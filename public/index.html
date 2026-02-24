@@ -1,0 +1,981 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API 101 - Interactive Playground</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        min-height: 100vh;
+        color: #fff;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding: 20px;
+      }
+
+      header h1 {
+        font-size: 2.5rem;
+        background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      header p {
+        color: #8892b0;
+        margin-top: 10px;
+      }
+
+      .main-content {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 20px;
+      }
+
+      @media (max-width: 1000px) {
+        .main-content {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Sidebar - Preset Examples */
+      .sidebar {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 20px;
+        height: fit-content;
+      }
+
+      .sidebar h2 {
+        color: #00d2ff;
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .example-group {
+        margin-bottom: 20px;
+      }
+
+      .example-group h3 {
+        color: #ccd6f6;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .example-btn {
+        display: block;
+        width: 100%;
+        padding: 10px 15px;
+        margin-bottom: 8px;
+        background: rgba(58, 123, 213, 0.2);
+        border: 1px solid rgba(58, 123, 213, 0.3);
+        border-radius: 8px;
+        color: #ccd6f6;
+        cursor: pointer;
+        text-align: left;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+      }
+
+      .example-btn:hover {
+        background: rgba(58, 123, 213, 0.4);
+        transform: translateX(5px);
+      }
+
+      .example-btn .method {
+        font-weight: bold;
+        margin-right: 8px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+      }
+
+      .method-get {
+        background: #28a745;
+        color: white;
+      }
+      .method-post {
+        background: #007bff;
+        color: white;
+      }
+      .method-put {
+        background: #fd7e14;
+        color: white;
+      }
+      .method-patch {
+        background: #6f42c1;
+        color: white;
+      }
+      .method-delete {
+        background: #dc3545;
+        color: white;
+      }
+
+      /* Main Panel */
+      .main-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      /* Request Builder */
+      .request-builder {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 25px;
+      }
+
+      .request-builder h2 {
+        color: #00d2ff;
+        margin-bottom: 20px;
+      }
+
+      .form-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+
+      .form-group {
+        flex: 1;
+      }
+
+      .form-group label {
+        display: block;
+        color: #8892b0;
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: #fff;
+        font-family: "Fira Code", monospace;
+        font-size: 0.9rem;
+      }
+
+      .form-group textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      .form-group select {
+        cursor: pointer;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: #00d2ff;
+      }
+
+      .send-btn {
+        background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+        border: none;
+        padding: 15px 40px;
+        border-radius: 8px;
+        color: white;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+
+      .send-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0, 210, 255, 0.3);
+      }
+
+      .send-btn:active {
+        transform: translateY(0);
+      }
+
+      /* Response Panel */
+      .response-panel {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 25px;
+      }
+
+      .response-panel h2 {
+        color: #00d2ff;
+        margin-bottom: 20px;
+      }
+
+      .response-meta {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+      }
+
+      .meta-item {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 10px 20px;
+        border-radius: 8px;
+      }
+
+      .meta-item span {
+        color: #8892b0;
+        font-size: 0.8rem;
+      }
+
+      .meta-item strong {
+        display: block;
+        font-size: 1.1rem;
+        margin-top: 3px;
+      }
+
+      .status-2xx {
+        color: #28a745;
+      }
+      .status-3xx {
+        color: #fd7e14;
+      }
+      .status-4xx {
+        color: #ffc107;
+      }
+      .status-5xx {
+        color: #dc3545;
+      }
+
+      .response-body {
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 8px;
+        padding: 20px;
+        overflow-x: auto;
+      }
+
+      .response-body pre {
+        margin: 0;
+        font-family: "Fira Code", "Consolas", monospace;
+        font-size: 0.85rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+
+      /* Concepts Section */
+      .concepts {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 25px;
+        margin-top: 30px;
+      }
+
+      .concepts h2 {
+        color: #00d2ff;
+        margin-bottom: 20px;
+      }
+
+      .concept-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+      }
+
+      .concept-card {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        padding: 20px;
+        border-left: 4px solid #3a7bd5;
+      }
+
+      .concept-card h3 {
+        color: #ccd6f6;
+        margin-bottom: 10px;
+        font-size: 1rem;
+      }
+
+      .concept-card p {
+        color: #8892b0;
+        font-size: 0.85rem;
+        line-height: 1.6;
+      }
+
+      .concept-card code {
+        background: rgba(0, 210, 255, 0.1);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+        color: #00d2ff;
+      }
+
+      /* Loading state */
+      .loading {
+        text-align: center;
+        padding: 40px;
+        color: #8892b0;
+      }
+
+      .loading::after {
+        content: "";
+        animation: dots 1.5s infinite;
+      }
+
+      @keyframes dots {
+        0%,
+        20% {
+          content: ".";
+        }
+        40% {
+          content: "..";
+        }
+        60%,
+        100% {
+          content: "...";
+        }
+      }
+
+      /* Tabs for Headers/Body */
+      .tabs {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 10px;
+      }
+
+      .tab-btn {
+        padding: 8px 16px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid transparent;
+        border-radius: 6px 6px 0 0;
+        color: #8892b0;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .tab-btn.active {
+        background: rgba(0, 210, 255, 0.1);
+        border-color: #00d2ff;
+        color: #00d2ff;
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      /* Help text */
+      .help-text {
+        font-size: 0.8rem;
+        color: #8892b0;
+        margin-top: 5px;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🚀 API 101 - Interactive Playground</h1>
+        <p>
+          Build, send, and explore HTTP requests to understand how APIs work!
+        </p>
+      </header>
+
+      <div class="main-content">
+        <!-- Sidebar with presets -->
+        <div class="sidebar">
+          <h2>📚 Quick Examples</h2>
+
+          <div class="example-group">
+            <h3>GET Requests</h3>
+            <button class="example-btn" onclick="loadExample('getAllBooks')">
+              <span class="method method-get">GET</span> All Books
+            </button>
+            <button class="example-btn" onclick="loadExample('getOneBook')">
+              <span class="method method-get">GET</span> Single Book (ID: 1)
+            </button>
+            <button
+              class="example-btn"
+              onclick="loadExample('getBooksFiltered')"
+            >
+              <span class="method method-get">GET</span> Filter by Genre
+            </button>
+            <button class="example-btn" onclick="loadExample('searchBooks')">
+              <span class="method method-get">GET</span> Search Books
+            </button>
+            <button class="example-btn" onclick="loadExample('getRandom')">
+              <span class="method method-get">GET</span> Random Data
+            </button>
+          </div>
+
+          <div class="example-group">
+            <h3>POST Requests</h3>
+            <button class="example-btn" onclick="loadExample('createBook')">
+              <span class="method method-post">POST</span> Create Book
+            </button>
+            <button class="example-btn" onclick="loadExample('echoRequest')">
+              <span class="method method-post">POST</span> Echo (Debug)
+            </button>
+            <button class="example-btn" onclick="loadExample('calculate')">
+              <span class="method method-post">POST</span> Calculator
+            </button>
+          </div>
+
+          <div class="example-group">
+            <h3>PUT / PATCH Requests</h3>
+            <button class="example-btn" onclick="loadExample('replaceBook')">
+              <span class="method method-put">PUT</span> Replace Book
+            </button>
+            <button class="example-btn" onclick="loadExample('updateBook')">
+              <span class="method method-patch">PATCH</span> Update Book
+            </button>
+          </div>
+
+          <div class="example-group">
+            <h3>DELETE Requests</h3>
+            <button class="example-btn" onclick="loadExample('deleteBook')">
+              <span class="method method-delete">DELETE</span> Delete Book
+            </button>
+          </div>
+
+          <div class="example-group">
+            <h3>Auth & Headers</h3>
+            <button class="example-btn" onclick="loadExample('getUsers')">
+              <span class="method method-get">GET</span> Users (No Auth)
+            </button>
+            <button class="example-btn" onclick="loadExample('getUsersAuth')">
+              <span class="method method-get">GET</span> Users (With Auth)
+            </button>
+            <button
+              class="example-btn"
+              onclick="loadExample('createUserApiKey')"
+            >
+              <span class="method method-post">POST</span> Create User (API Key)
+            </button>
+          </div>
+
+          <div class="example-group">
+            <h3>Status Codes</h3>
+            <button class="example-btn" onclick="loadExample('status200')">
+              <span class="method method-get">GET</span> 200 OK
+            </button>
+            <button class="example-btn" onclick="loadExample('status404')">
+              <span class="method method-get">GET</span> 404 Not Found
+            </button>
+            <button class="example-btn" onclick="loadExample('status500')">
+              <span class="method method-get">GET</span> 500 Server Error
+            </button>
+          </div>
+        </div>
+
+        <!-- Main panel -->
+        <div class="main-panel">
+          <!-- Request Builder -->
+          <div class="request-builder">
+            <h2>📤 Request Builder</h2>
+
+            <div class="form-row">
+              <div class="form-group" style="flex: 0 0 150px">
+                <label for="method">Method</label>
+                <select id="method" onchange="updateMethodColor()">
+                  <option value="GET">GET</option>
+                  <option value="POST">POST</option>
+                  <option value="PUT">PUT</option>
+                  <option value="PATCH">PATCH</option>
+                  <option value="DELETE">DELETE</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="url">URL</label>
+                <input
+                  type="text"
+                  id="url"
+                  value="/api/books"
+                  placeholder="/api/books"
+                />
+              </div>
+            </div>
+
+            <div class="tabs">
+              <button class="tab-btn active" onclick="switchTab('headers')">
+                Headers
+              </button>
+              <button class="tab-btn" onclick="switchTab('body')">Body</button>
+            </div>
+
+            <div id="tab-headers" class="tab-content active">
+              <div class="form-group">
+                <textarea
+                  id="headers"
+                  placeholder='{"Content-Type": "application/json", "Authorization": "Bearer token"}'
+                >
+{
+  "Content-Type": "application/json"
+}</textarea
+                >
+                <p class="help-text">Enter headers as JSON object</p>
+              </div>
+            </div>
+
+            <div id="tab-body" class="tab-content">
+              <div class="form-group">
+                <textarea
+                  id="body"
+                  placeholder='{"title": "My Book", "author": "John Doe"}'
+                ></textarea>
+                <p class="help-text">
+                  Enter request body as JSON (for POST, PUT, PATCH)
+                </p>
+              </div>
+            </div>
+
+            <button class="send-btn" onclick="sendRequest()">
+              🚀 Send Request
+            </button>
+          </div>
+
+          <!-- Response Panel -->
+          <div class="response-panel">
+            <h2>📥 Response</h2>
+
+            <div class="response-meta">
+              <div class="meta-item">
+                <span>Status</span>
+                <strong id="response-status">-</strong>
+              </div>
+              <div class="meta-item">
+                <span>Time</span>
+                <strong id="response-time">-</strong>
+              </div>
+              <div class="meta-item">
+                <span>Size</span>
+                <strong id="response-size">-</strong>
+              </div>
+            </div>
+
+            <div class="response-body">
+              <pre id="response-body">
+Click "Send Request" or try one of the examples on the left to see the response here!</pre
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Concepts Reference -->
+      <div class="concepts">
+        <h2>📖 Quick Reference</h2>
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h3>🟢 GET</h3>
+            <p>
+              Retrieves data from the server. Should not modify any data.
+              Example: <code>GET /api/books</code>
+            </p>
+          </div>
+          <div class="concept-card">
+            <h3>🔵 POST</h3>
+            <p>
+              Creates new resources on the server. Sends data in the request
+              body. Example: <code>POST /api/books</code>
+            </p>
+          </div>
+          <div class="concept-card">
+            <h3>🟠 PUT</h3>
+            <p>
+              Replaces an entire resource. Requires ALL fields. Example:
+              <code>PUT /api/books/1</code>
+            </p>
+          </div>
+          <div class="concept-card">
+            <h3>🟣 PATCH</h3>
+            <p>
+              Partially updates a resource. Only send fields you want to change.
+              Example: <code>PATCH /api/books/1</code>
+            </p>
+          </div>
+          <div class="concept-card">
+            <h3>🔴 DELETE</h3>
+            <p>
+              Removes a resource from the server. Example:
+              <code>DELETE /api/books/1</code>
+            </p>
+          </div>
+          <div class="concept-card">
+            <h3>📍 Path Parameters</h3>
+            <p>
+              Dynamic parts of the URL that identify resources. Example:
+              <code>/api/books/:id</code> where :id is 1, 2, etc.
+            </p>
+          </div>
+          <div class="concept-card">
+            <h3>❓ Query Parameters</h3>
+            <p>
+              Key-value pairs after <code>?</code> for filtering. Example:
+              <code>/api/books?genre=Tech&limit=5</code>
+            </p>
+          </div>
+          <div class="concept-card">
+            <h3>📋 Headers</h3>
+            <p>
+              Metadata about the request like <code>Content-Type</code>,
+              <code>Authorization</code>, and custom headers.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const BASE_URL = "http://localhost:3000";
+
+      // Preset examples
+      const examples = {
+        // GET examples
+        getAllBooks: {
+          method: "GET",
+          url: "/api/books",
+          headers: {},
+          body: "",
+        },
+        getOneBook: {
+          method: "GET",
+          url: "/api/books/1",
+          headers: {},
+          body: "",
+        },
+        getBooksFiltered: {
+          method: "GET",
+          url: "/api/books?genre=Technology&sort=year",
+          headers: {},
+          body: "",
+        },
+        searchBooks: {
+          method: "GET",
+          url: "/api/search?q=API&minYear=2020",
+          headers: {},
+          body: "",
+        },
+        getRandom: {
+          method: "GET",
+          url: "/api/random",
+          headers: {},
+          body: "",
+        },
+
+        // POST examples
+        createBook: {
+          method: "POST",
+          url: "/api/books",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(
+            {
+              title: "My New Book",
+              author: "Your Name",
+              year: 2024,
+              genre: "Education",
+            },
+            null,
+            2,
+          ),
+        },
+        echoRequest: {
+          method: "POST",
+          url: "/api/echo",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Custom-Header": "Hello World!",
+          },
+          body: JSON.stringify(
+            {
+              message: "This will be echoed back!",
+              nested: { data: [1, 2, 3] },
+            },
+            null,
+            2,
+          ),
+        },
+        calculate: {
+          method: "POST",
+          url: "/api/calculate",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(
+            {
+              operation: "multiply",
+              a: 7,
+              b: 8,
+            },
+            null,
+            2,
+          ),
+        },
+
+        // PUT/PATCH examples
+        replaceBook: {
+          method: "PUT",
+          url: "/api/books/1",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(
+            {
+              title: "Completely New Title",
+              author: "New Author",
+              year: 2025,
+              genre: "Science Fiction",
+            },
+            null,
+            2,
+          ),
+        },
+        updateBook: {
+          method: "PATCH",
+          url: "/api/books/2",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(
+            {
+              year: 2030,
+            },
+            null,
+            2,
+          ),
+        },
+
+        // DELETE example
+        deleteBook: {
+          method: "DELETE",
+          url: "/api/books/3",
+          headers: {},
+          body: "",
+        },
+
+        // Auth examples
+        getUsers: {
+          method: "GET",
+          url: "/api/users",
+          headers: {},
+          body: "",
+        },
+        getUsersAuth: {
+          method: "GET",
+          url: "/api/users",
+          headers: { Authorization: "Bearer secret-token-123" },
+          body: "",
+        },
+        createUserApiKey: {
+          method: "POST",
+          url: "/api/users",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-Key": "my-secret-api-key",
+          },
+          body: JSON.stringify(
+            {
+              username: "newuser",
+              email: "newuser@example.com",
+              role: "student",
+            },
+            null,
+            2,
+          ),
+        },
+
+        // Status code examples
+        status200: {
+          method: "GET",
+          url: "/api/status/200",
+          headers: {},
+          body: "",
+        },
+        status404: {
+          method: "GET",
+          url: "/api/status/404",
+          headers: {},
+          body: "",
+        },
+        status500: {
+          method: "GET",
+          url: "/api/status/500",
+          headers: {},
+          body: "",
+        },
+      };
+
+      function loadExample(name) {
+        const example = examples[name];
+        if (!example) return;
+
+        document.getElementById("method").value = example.method;
+        document.getElementById("url").value = example.url;
+        document.getElementById("headers").value = Object.keys(example.headers)
+          .length
+          ? JSON.stringify(example.headers, null, 2)
+          : "{}";
+        document.getElementById("body").value = example.body;
+
+        updateMethodColor();
+
+        // Auto-switch to body tab if there's body content
+        if (example.body) {
+          switchTab("body");
+        } else {
+          switchTab("headers");
+        }
+      }
+
+      function switchTab(tabName) {
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((content) => content.classList.remove("active"));
+
+        event.target.classList.add("active");
+        document.getElementById(`tab-${tabName}`).classList.add("active");
+      }
+
+      function updateMethodColor() {
+        const method = document.getElementById("method").value;
+        const select = document.getElementById("method");
+
+        select.style.borderColor =
+          {
+            GET: "#28a745",
+            POST: "#007bff",
+            PUT: "#fd7e14",
+            PATCH: "#6f42c1",
+            DELETE: "#dc3545",
+          }[method] || "#00d2ff";
+      }
+
+      async function sendRequest() {
+        const method = document.getElementById("method").value;
+        const url = document.getElementById("url").value;
+        let headers = {};
+        let body = document.getElementById("body").value;
+
+        // Parse headers
+        try {
+          const headersText = document.getElementById("headers").value;
+          if (headersText.trim()) {
+            headers = JSON.parse(headersText);
+          }
+        } catch (e) {
+          document.getElementById("response-body").textContent =
+            "❌ Error: Invalid JSON in headers\n\n" + e.message;
+          return;
+        }
+
+        // Prepare request options
+        const options = {
+          method,
+          headers,
+        };
+
+        // Add body for methods that support it
+        if (["POST", "PUT", "PATCH"].includes(method) && body.trim()) {
+          try {
+            JSON.parse(body); // Validate JSON
+            options.body = body;
+          } catch (e) {
+            document.getElementById("response-body").textContent =
+              "❌ Error: Invalid JSON in body\n\n" + e.message;
+            return;
+          }
+        }
+
+        // Show loading
+        document.getElementById("response-body").innerHTML =
+          '<div class="loading">Sending request</div>';
+        document.getElementById("response-status").textContent = "...";
+        document.getElementById("response-status").className = "";
+        document.getElementById("response-time").textContent = "...";
+        document.getElementById("response-size").textContent = "...";
+
+        const startTime = performance.now();
+
+        try {
+          const response = await fetch(BASE_URL + url, options);
+          const endTime = performance.now();
+          const duration = Math.round(endTime - startTime);
+
+          const responseText = await response.text();
+          let responseData;
+
+          try {
+            responseData = JSON.parse(responseText);
+            responseData = JSON.stringify(responseData, null, 2);
+          } catch {
+            responseData = responseText;
+          }
+
+          // Update status
+          const statusEl = document.getElementById("response-status");
+          statusEl.textContent = `${response.status} ${response.statusText}`;
+          statusEl.className = getStatusClass(response.status);
+
+          // Update time
+          document.getElementById("response-time").textContent =
+            `${duration}ms`;
+
+          // Update size
+          const size = new Blob([responseText]).size;
+          document.getElementById("response-size").textContent =
+            formatBytes(size);
+
+          // Update body
+          document.getElementById("response-body").textContent = responseData;
+        } catch (error) {
+          document.getElementById("response-status").textContent = "Error";
+          document.getElementById("response-status").className = "status-5xx";
+          document.getElementById("response-time").textContent = "-";
+          document.getElementById("response-size").textContent = "-";
+          document.getElementById("response-body").textContent =
+            `❌ Request Failed!\n\n${error.message}\n\n💡 Make sure the server is running:\n   npm start`;
+        }
+      }
+
+      function getStatusClass(status) {
+        if (status >= 200 && status < 300) return "status-2xx";
+        if (status >= 300 && status < 400) return "status-3xx";
+        if (status >= 400 && status < 500) return "status-4xx";
+        return "status-5xx";
+      }
+
+      function formatBytes(bytes) {
+        if (bytes === 0) return "0 B";
+        const k = 1024;
+        const sizes = ["B", "KB", "MB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+      }
+
+      // Initialize
+      updateMethodColor();
+    </script>
+  </body>
+</html>
