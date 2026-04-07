@@ -1,0 +1,8 @@
+# API-101 Learning Playground
+# https://github.com/vishnuGops/API-101
+
+User-agent: *
+Allow: /
+
+# Crawl-delay suggestion (optional, for politeness)
+Crawl-delay: 1

@@ -3,7 +3,145 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>API 101 - Interactive Playground</title>
+    <title>
+      API 101 - Learn REST APIs Interactive Tutorial | HTTP Methods, CRUD,
+      Authentication
+    </title>
+
+    <!-- SEO Meta Tags -->
+    <meta
+      name="description"
+      content="Free interactive API tutorial. Learn REST APIs, HTTP methods (GET, POST, PUT, DELETE), authentication, pagination, rate limiting, and more with hands-on examples. Perfect for beginners and developers."
+    />
+    <meta
+      name="keywords"
+      content="learn API, REST API tutorial, HTTP methods, GET POST PUT DELETE, API for beginners, web API course, REST tutorial, API playground, learn HTTP requests, API authentication, JSON API, fetch API, CRUD operations, API rate limiting, pagination API, webhook tutorial"
+    />
+    <meta name="author" content="API-101" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://github.com/vishnuGops/API-101" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://github.com/vishnuGops/API-101" />
+    <meta
+      property="og:title"
+      content="API 101 - Learn REST APIs with Interactive Examples"
+    />
+    <meta
+      property="og:description"
+      content="Free hands-on API learning playground. Master HTTP methods, authentication, pagination, webhooks and 30+ real API concepts through interactive examples."
+    />
+    <meta
+      property="og:image"
+      content="https://opengraph.githubassets.com/1/vishnuGops/API-101"
+    />
+    <meta property="og:site_name" content="GitHub" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://github.com/vishnuGops/API-101" />
+    <meta
+      name="twitter:title"
+      content="API 101 - Interactive REST API Tutorial"
+    />
+    <meta
+      name="twitter:description"
+      content="Learn APIs hands-on! Free interactive playground covering HTTP methods, CRUD, authentication, pagination, rate limiting & more."
+    />
+    <meta
+      name="twitter:image"
+      content="https://opengraph.githubassets.com/1/vishnuGops/API-101"
+    />
+
+    <!-- Structured Data - Course/Tutorial -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Course",
+        "name": "API 101 - Learn REST APIs",
+        "description": "Interactive tutorial to learn REST APIs, HTTP methods, authentication, and advanced API concepts through hands-on practice",
+        "provider": {
+          "@type": "Organization",
+          "name": "API-101",
+          "sameAs": "https://github.com/vishnuGops/API-101"
+        },
+        "educationalLevel": "Beginner to Intermediate",
+        "isAccessibleForFree": true,
+        "teaches": [
+          "REST API fundamentals",
+          "HTTP methods (GET, POST, PUT, PATCH, DELETE)",
+          "API authentication (Bearer tokens, API keys)",
+          "Query parameters and path parameters",
+          "Pagination and rate limiting",
+          "Webhooks and ETags",
+          "Content negotiation",
+          "Idempotency in APIs"
+        ],
+        "courseMode": "Online",
+        "inLanguage": "en"
+      }
+    </script>
+
+    <!-- Structured Data - WebApplication -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "API 101 Playground",
+        "description": "Interactive API testing playground for learning REST APIs",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    </script>
+
+    <!-- Structured Data - FAQPage for common API questions -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is a REST API?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A REST API (Representational State Transfer Application Programming Interface) is a way for different software applications to communicate over the internet using HTTP methods like GET, POST, PUT, and DELETE to perform operations on resources."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the difference between GET and POST requests?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "GET requests retrieve data from a server without modifying it (read-only), while POST requests send data to create new resources on the server. GET parameters are in the URL, POST data is in the request body."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the difference between PUT and PATCH?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "PUT replaces an entire resource with new data (you must send all fields), while PATCH partially updates a resource (you only send the fields you want to change)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is API rate limiting?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Rate limiting restricts how many API requests a client can make within a time window (e.g., 100 requests per minute). It protects servers from abuse and ensures fair usage. When exceeded, you typically receive a 429 Too Many Requests status."
+            }
+          }
+        ]
+      }
+    </script>
+
     <style>
       * {
         margin: 0;
