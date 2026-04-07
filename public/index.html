@@ -60,7 +60,10 @@
         background: rgba(255, 255, 255, 0.05);
         border-radius: 15px;
         padding: 20px;
-        height: fit-content;
+        height: 70vh;
+        overflow-y: scroll;
+        scrollbar-width: thin;
+        scrollbar-color: #3a7bd5 rgba(255, 255, 255, 0.1);
       }
 
       .sidebar h2 {
@@ -129,6 +132,10 @@
       }
       .method-delete {
         background: #dc3545;
+        color: white;
+      }
+      .method-head {
+        background: #6c757d;
         color: white;
       }
 
@@ -405,7 +412,7 @@
         );
         border: 1px solid rgba(0, 210, 255, 0.3);
         border-radius: 15px;
-        padding: 25px;
+        padding: 15px 20px;
         position: relative;
         overflow: hidden;
       }
@@ -428,11 +435,15 @@
         display: flex;
         align-items: center;
         gap: 12px;
-        margin-bottom: 15px;
+        cursor: pointer;
+      }
+
+      .explanation-header:hover .expand-toggle {
+        background: rgba(0, 210, 255, 0.2);
       }
 
       .explanation-icon {
-        font-size: 2rem;
+        font-size: 1.5rem;
       }
 
       .explanation-title {
@@ -441,22 +452,78 @@
 
       .explanation-title h3 {
         color: #00d2ff;
-        font-size: 1.1rem;
-        margin-bottom: 3px;
+        font-size: 1rem;
+        margin-bottom: 2px;
       }
 
       .explanation-title .method-badge {
         display: inline-block;
-        padding: 3px 10px;
+        padding: 2px 8px;
         border-radius: 4px;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         font-weight: bold;
         margin-right: 8px;
+      }
+
+      .explanation-preview {
+        color: #a8b2d1;
+        font-size: 0.85rem;
+        margin-top: 4px;
+        line-height: 1.4;
+      }
+
+      .expand-toggle {
+        background: rgba(0, 210, 255, 0.1);
+        border: 1px solid rgba(0, 210, 255, 0.3);
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #00d2ff;
+        font-size: 0.8rem;
+      }
+
+      .expand-toggle:hover {
+        background: rgba(0, 210, 255, 0.3);
+        transform: scale(1.1);
+      }
+
+      .expand-toggle svg {
+        width: 14px;
+        height: 14px;
+        transition: transform 0.3s ease;
+      }
+
+      .explanation-panel.expanded .expand-toggle svg {
+        transform: rotate(180deg);
       }
 
       .explanation-content {
         color: #ccd6f6;
         line-height: 1.7;
+        max-height: 0;
+        overflow: hidden;
+        transition:
+          max-height 0.3s ease,
+          margin-top 0.3s ease,
+          padding-top 0.3s ease;
+        margin-top: 0;
+        padding-top: 0;
+      }
+
+      .explanation-panel.expanded .explanation-content {
+        max-height: 1000px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid rgba(0, 210, 255, 0.2);
+      }
+
+      .explanation-panel.expanded .explanation-preview {
+        display: none;
       }
 
       .explanation-content p {
@@ -609,13 +676,169 @@
               <span class="method method-get">GET</span> 500 Server Error
             </button>
           </div>
+
+          <!-- ============================================ -->
+          <!-- ADVANCED API CONCEPTS                        -->
+          <!-- ============================================ -->
+
+          <div class="example-group">
+            <h3>📄 Pagination</h3>
+            <button
+              class="example-btn"
+              onclick="loadExample('paginationBasic')"
+            >
+              <span class="method method-get">GET</span> Products (Page 1)
+            </button>
+            <button
+              class="example-btn"
+              onclick="loadExample('paginationPage2')"
+            >
+              <span class="method method-get">GET</span> Products (Page 2)
+            </button>
+            <button
+              class="example-btn"
+              onclick="loadExample('paginationFiltered')"
+            >
+              <span class="method method-get">GET</span> Products (Filtered)
+            </button>
+          </div>
+
+          <div class="example-group">
+            <h3>🚦 Rate Limiting</h3>
+            <button class="example-btn" onclick="loadExample('rateLimitTest')">
+              <span class="method method-get">GET</span> Test Rate Limit
+            </button>
+            <button
+              class="example-btn"
+              onclick="loadExample('rateLimitNewUser')"
+            >
+              <span class="method method-get">GET</span> Different User
+            </button>
+          </div>
+
+          <div class="example-group">
+            <h3>📦 Bulk Operations</h3>
+            <button class="example-btn" onclick="loadExample('bulkCreate')">
+              <span class="method method-post">POST</span> Bulk Create
+            </button>
+            <button class="example-btn" onclick="loadExample('bulkUpdate')">
+              <span class="method method-patch">PATCH</span> Bulk Update
+            </button>
+            <button class="example-btn" onclick="loadExample('viewInventory')">
+              <span class="method method-get">GET</span> View Inventory
+            </button>
+          </div>
+
+          <div class="example-group">
+            <h3>🔗 Nested Resources</h3>
+            <button class="example-btn" onclick="loadExample('getReviews')">
+              <span class="method method-get">GET</span> Book Reviews
+            </button>
+            <button class="example-btn" onclick="loadExample('addReview')">
+              <span class="method method-post">POST</span> Add Review
+            </button>
+          </div>
+
+          <div class="example-group">
+            <h3>🎛️ Field Selection</h3>
+            <button
+              class="example-btn"
+              onclick="loadExample('fieldSelectBasic')"
+            >
+              <span class="method method-get">GET</span> Select Fields
+            </button>
+            <button
+              class="example-btn"
+              onclick="loadExample('fieldSelectMinimal')"
+            >
+              <span class="method method-get">GET</span> Minimal Fields
+            </button>
+          </div>
+
+          <div class="example-group">
+            <h3>🔀 Content Negotiation</h3>
+            <button class="example-btn" onclick="loadExample('contentJson')">
+              <span class="method method-get">GET</span> Get as JSON
+            </button>
+            <button class="example-btn" onclick="loadExample('contentXml')">
+              <span class="method method-get">GET</span> Get as XML
+            </button>
+            <button class="example-btn" onclick="loadExample('contentCsv')">
+              <span class="method method-get">GET</span> Get as CSV
+            </button>
+          </div>
+
+          <div class="example-group">
+            <h3>🔑 Idempotency</h3>
+            <button class="example-btn" onclick="loadExample('paymentNew')">
+              <span class="method method-post">POST</span> New Payment
+            </button>
+            <button class="example-btn" onclick="loadExample('paymentRetry')">
+              <span class="method method-post">POST</span> Retry (Same Key)
+            </button>
+          </div>
+
+          <div class="example-group">
+            <h3>🏷️ API Versioning</h3>
+            <button class="example-btn" onclick="loadExample('versionV1')">
+              <span class="method method-get">GET</span> v1 Greeting
+            </button>
+            <button class="example-btn" onclick="loadExample('versionV2')">
+              <span class="method method-get">GET</span> v2 Greeting
+            </button>
+            <button
+              class="example-btn"
+              onclick="loadExample('versionV2Spanish')"
+            >
+              <span class="method method-get">GET</span> v2 Spanish
+            </button>
+          </div>
+
+          <div class="example-group">
+            <h3>⏰ Caching (ETags)</h3>
+            <button class="example-btn" onclick="loadExample('etagGet')">
+              <span class="method method-get">GET</span> Get Article
+            </button>
+            <button
+              class="example-btn"
+              onclick="loadExample('etagConditional')"
+            >
+              <span class="method method-get">GET</span> Conditional Request
+            </button>
+            <button class="example-btn" onclick="loadExample('etagUpdate')">
+              <span class="method method-put">PUT</span> Update Article
+            </button>
+          </div>
+
+          <div class="example-group">
+            <h3>🔄 Webhooks</h3>
+            <button
+              class="example-btn"
+              onclick="loadExample('webhookSimulate')"
+            >
+              <span class="method method-post">POST</span> Simulate Event
+            </button>
+            <button class="example-btn" onclick="loadExample('webhookEvents')">
+              <span class="method method-get">GET</span> View Events
+            </button>
+          </div>
+
+          <div class="example-group">
+            <h3>🔍 Health & Info</h3>
+            <button class="example-btn" onclick="loadExample('healthCheck')">
+              <span class="method method-get">GET</span> Health Check
+            </button>
+            <button class="example-btn" onclick="loadExample('apiInfo')">
+              <span class="method method-get">GET</span> API Info
+            </button>
+          </div>
         </div>
 
         <!-- Main panel -->
         <div class="main-panel">
           <!-- Explanation Panel -->
           <div id="explanation-panel" class="explanation-panel hidden">
-            <div class="explanation-header">
+            <div class="explanation-header" onclick="toggleExplanation()">
               <span class="explanation-icon" id="explanation-icon">📚</span>
               <div class="explanation-title">
                 <span
@@ -624,6 +847,26 @@
                   >GET</span
                 >
                 <h3 id="explanation-title">Select an example to learn</h3>
+                <div class="explanation-preview" id="explanation-preview">
+                  Click to expand for details
+                </div>
+              </div>
+              <div
+                class="expand-toggle"
+                id="expand-toggle"
+                title="Expand/Collapse"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
               </div>
             </div>
             <div class="explanation-content" id="explanation-content">
@@ -647,6 +890,7 @@
                   <option value="PUT">PUT</option>
                   <option value="PATCH">PATCH</option>
                   <option value="DELETE">DELETE</option>
+                  <option value="HEAD">HEAD</option>
                 </select>
               </div>
               <div class="form-group">
@@ -730,6 +974,7 @@ Click "Send Request" or try one of the examples on the left to see the response 
       <div class="concepts">
         <h2>📖 Quick Reference</h2>
         <div class="concept-grid">
+          <!-- HTTP Methods -->
           <div class="concept-card">
             <h3>🟢 GET</h3>
             <p>
@@ -766,6 +1011,15 @@ Click "Send Request" or try one of the examples on the left to see the response 
             </p>
           </div>
           <div class="concept-card">
+            <h3>⚪ HEAD</h3>
+            <p>
+              Like GET but returns only headers, no body. Great for checking if
+              a resource exists.
+            </p>
+          </div>
+
+          <!-- URL Concepts -->
+          <div class="concept-card">
             <h3>📍 Path Parameters</h3>
             <p>
               Dynamic parts of the URL that identify resources. Example:
@@ -784,6 +1038,58 @@ Click "Send Request" or try one of the examples on the left to see the response 
             <p>
               Metadata about the request like <code>Content-Type</code>,
               <code>Authorization</code>, and custom headers.
+            </p>
+          </div>
+
+          <!-- Advanced Concepts -->
+          <div class="concept-card">
+            <h3>📄 Pagination</h3>
+            <p>
+              Split large datasets into pages. Use <code>?page=2&limit=10</code>
+              to navigate through results.
+            </p>
+          </div>
+          <div class="concept-card">
+            <h3>🚦 Rate Limiting</h3>
+            <p>
+              APIs limit requests per time window. Check
+              <code>X-RateLimit-Remaining</code> header. 429 = too many
+              requests.
+            </p>
+          </div>
+          <div class="concept-card">
+            <h3>🔑 Idempotency</h3>
+            <p>
+              Same request = same result. Use <code>X-Idempotency-Key</code>
+              header to prevent duplicate operations.
+            </p>
+          </div>
+          <div class="concept-card">
+            <h3>🔗 Nested Resources</h3>
+            <p>
+              Resources belonging to others: <code>/books/1/reviews</code>
+              shows reviews for book 1.
+            </p>
+          </div>
+          <div class="concept-card">
+            <h3>🏷️ API Versioning</h3>
+            <p>
+              Evolve APIs without breaking clients: <code>/api/v1/</code> vs
+              <code>/api/v2/</code> for backward compatibility.
+            </p>
+          </div>
+          <div class="concept-card">
+            <h3>⏰ ETags & Caching</h3>
+            <p>
+              ETags identify resource versions. Send <code>If-None-Match</code>
+              to get 304 (use cache) if unchanged.
+            </p>
+          </div>
+          <div class="concept-card">
+            <h3>🔔 Webhooks</h3>
+            <p>
+              Server pushes events to YOUR URL when things happen. Reverse of
+              normal API calls.
             </p>
           </div>
         </div>
@@ -958,6 +1264,272 @@ Click "Send Request" or try one of the examples on the left to see the response 
         status500: {
           method: "GET",
           url: "/api/status/500",
+          headers: {},
+          body: "",
+        },
+
+        // ============================================
+        // ADVANCED API EXAMPLES
+        // ============================================
+
+        // --- Pagination Examples ---
+        // Demonstrates how APIs handle large datasets by returning data in chunks
+        paginationBasic: {
+          method: "GET",
+          url: "/api/products?page=1&limit=5",
+          headers: {},
+          body: "",
+        },
+        paginationPage2: {
+          method: "GET",
+          url: "/api/products?page=2&limit=5",
+          headers: {},
+          body: "",
+        },
+        paginationFiltered: {
+          method: "GET",
+          url: "/api/products?page=1&limit=10&category=Electronics",
+          headers: {},
+          body: "",
+        },
+
+        // --- Rate Limiting Examples ---
+        // Shows how APIs protect themselves from abuse
+        rateLimitTest: {
+          method: "GET",
+          url: "/api/limited",
+          headers: {},
+          body: "",
+        },
+        rateLimitNewUser: {
+          method: "GET",
+          url: "/api/limited?userId=user-123",
+          headers: {},
+          body: "",
+        },
+
+        // --- Bulk Operations Examples ---
+        // Efficient batch processing of multiple items
+        bulkCreate: {
+          method: "POST",
+          url: "/api/bulk/create",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(
+            {
+              items: [
+                { name: "New Widget", quantity: 25 },
+                { name: "Super Gadget", quantity: 50 },
+                { name: "Mega Device", quantity: 10 },
+              ],
+            },
+            null,
+            2,
+          ),
+        },
+        bulkUpdate: {
+          method: "PATCH",
+          url: "/api/bulk/update",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(
+            {
+              updates: [
+                { sku: "SKU001", quantity: 200 },
+                { sku: "SKU002", quantity: 75 },
+              ],
+            },
+            null,
+            2,
+          ),
+        },
+        viewInventory: {
+          method: "GET",
+          url: "/api/inventory",
+          headers: {},
+          body: "",
+        },
+
+        // --- Nested Resources Examples ---
+        // Resources that belong to other resources (parent/child relationships)
+        getReviews: {
+          method: "GET",
+          url: "/api/books/1/reviews",
+          headers: {},
+          body: "",
+        },
+        addReview: {
+          method: "POST",
+          url: "/api/books/1/reviews",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(
+            {
+              rating: 5,
+              comment: "Fantastic book! A must-read for API developers.",
+              author: "Happy Reader",
+            },
+            null,
+            2,
+          ),
+        },
+
+        // --- Field Selection Examples ---
+        // Request only the fields you need (like GraphQL)
+        fieldSelectBasic: {
+          method: "GET",
+          url: "/api/books-select?fields=id,title,author",
+          headers: {},
+          body: "",
+        },
+        fieldSelectMinimal: {
+          method: "GET",
+          url: "/api/books-select?fields=id,title",
+          headers: {},
+          body: "",
+        },
+
+        // --- Content Negotiation Examples ---
+        // Same data, different formats based on Accept header
+        contentJson: {
+          method: "GET",
+          url: "/api/data",
+          headers: { Accept: "application/json" },
+          body: "",
+        },
+        contentXml: {
+          method: "GET",
+          url: "/api/data",
+          headers: { Accept: "application/xml" },
+          body: "",
+        },
+        contentCsv: {
+          method: "GET",
+          url: "/api/data",
+          headers: { Accept: "text/csv" },
+          body: "",
+        },
+
+        // --- Idempotency Examples ---
+        // Prevent duplicate operations (critical for payments!)
+        paymentNew: {
+          method: "POST",
+          url: "/api/payment",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Idempotency-Key": "order-12345-v1",
+          },
+          body: JSON.stringify(
+            {
+              amount: 99.99,
+              currency: "USD",
+              description: "Premium API Course",
+            },
+            null,
+            2,
+          ),
+        },
+        paymentRetry: {
+          method: "POST",
+          url: "/api/payment",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Idempotency-Key": "order-12345-v1",
+          },
+          body: JSON.stringify(
+            {
+              amount: 99.99,
+              currency: "USD",
+              description: "Premium API Course",
+            },
+            null,
+            2,
+          ),
+        },
+
+        // --- API Versioning Examples ---
+        // Backward compatibility while adding new features
+        versionV1: {
+          method: "GET",
+          url: "/api/v1/greeting?name=Developer",
+          headers: {},
+          body: "",
+        },
+        versionV2: {
+          method: "GET",
+          url: "/api/v2/greeting?name=Developer",
+          headers: {},
+          body: "",
+        },
+        versionV2Spanish: {
+          method: "GET",
+          url: "/api/v2/greeting?name=Amigo&lang=es",
+          headers: {},
+          body: "",
+        },
+
+        // --- ETag/Caching Examples ---
+        // Efficient caching with conditional requests
+        etagGet: {
+          method: "GET",
+          url: "/api/article",
+          headers: {},
+          body: "",
+        },
+        etagConditional: {
+          method: "GET",
+          url: "/api/article",
+          headers: { "If-None-Match": '"v1"' },
+          body: "",
+        },
+        etagUpdate: {
+          method: "PUT",
+          url: "/api/article",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(
+            {
+              content:
+                "This is the updated article content with new information!",
+            },
+            null,
+            2,
+          ),
+        },
+
+        // --- Webhook Examples ---
+        // Event-driven architecture simulation
+        webhookSimulate: {
+          method: "POST",
+          url: "/api/webhooks/simulate",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(
+            {
+              event: "order.created",
+              data: {
+                orderId: "ORD-789",
+                customer: "john@example.com",
+                total: 149.99,
+              },
+            },
+            null,
+            2,
+          ),
+        },
+        webhookEvents: {
+          method: "GET",
+          url: "/api/webhooks/events",
+          headers: {},
+          body: "",
+        },
+
+        // --- Health & Info Examples ---
+        // Standard monitoring and discovery endpoints
+        healthCheck: {
+          method: "GET",
+          url: "/api/health",
+          headers: {},
+          body: "",
+        },
+        apiInfo: {
+          method: "GET",
+          url: "/api/info",
           headers: {},
           body: "",
         },
@@ -1255,6 +1827,543 @@ Click "Send Request" or try one of the examples on the left to see the response 
             <div class="try-it-tip">In production, 500 errors are logged for developers to investigate.</div>
           `,
         },
+
+        // ============================================
+        // ADVANCED API EXPLANATIONS
+        // ============================================
+
+        // --- Pagination Explanations ---
+        paginationBasic: {
+          icon: "📄",
+          title: "Pagination Basics",
+          content: `
+            <p>When an API has thousands of records, returning them all at once would be slow and wasteful. <strong>Pagination</strong> solves this by dividing data into manageable "pages".</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Pagination</strong>
+              Pagination returns data in chunks. Common parameters:<br>
+              • <code>page</code> - which page number (1, 2, 3...)<br>
+              • <code>limit</code> - items per page (10, 20, 50...)<br>
+              • Response includes metadata like <code>totalPages</code>, <code>hasNextPage</code>
+            </div>
+            <p>The response includes helpful links:</p>
+            <ul>
+              <li><strong>self</strong> - current page URL</li>
+              <li><strong>next/prev</strong> - navigate between pages</li>
+              <li><strong>first/last</strong> - jump to extremes</li>
+            </ul>
+            <div class="try-it-tip">Try changing page and limit values to navigate through the 100 products!</div>
+          `,
+        },
+        paginationPage2: {
+          icon: "📄",
+          title: "Navigate to Page 2",
+          content: `
+            <p>This demonstrates navigating to the <strong>second page</strong> of results.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Page Navigation</strong>
+              With <code>page=2&limit=5</code>, you're requesting items 6-10 (skipping the first 5). The server calculates: <code>startIndex = (page - 1) × limit</code>
+            </div>
+            <p>Notice in the response:</p>
+            <ul>
+              <li><code>hasPrevPage: true</code> - you can go back</li>
+              <li><code>hasNextPage: true</code> - more pages ahead</li>
+              <li>The <code>next</code> and <code>prev</code> links are populated</li>
+            </ul>
+            <div class="try-it-tip">Try page=20 with limit=5 to reach the last page of 100 products!</div>
+          `,
+        },
+        paginationFiltered: {
+          icon: "🔎",
+          title: "Pagination with Filtering",
+          content: `
+            <p>Pagination works together with <strong>filtering</strong>. Here we paginate only Electronics products.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Combined Query Parameters</strong>
+              You can mix pagination params with filter params. The filter is applied first, then pagination splits the filtered results.
+            </div>
+            <p>With <code>category=Electronics</code>:</p>
+            <ul>
+              <li>Total items is now filtered (not all 100)</li>
+              <li>Total pages recalculates based on filtered count</li>
+              <li>Each page shows only Electronics products</li>
+            </ul>
+            <div class="try-it-tip">Try different categories: Books, Clothing, Food, Toys!</div>
+          `,
+        },
+
+        // --- Rate Limiting Explanations ---
+        rateLimitTest: {
+          icon: "🚦",
+          title: "Rate Limiting",
+          content: `
+            <p><strong>Rate limiting</strong> protects APIs from abuse by limiting how many requests a client can make in a time window.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Rate Limiting</strong>
+              This endpoint allows 5 requests per minute. Standard headers tell you your limit status:<br>
+              • <code>X-RateLimit-Limit</code> - max requests allowed<br>
+              • <code>X-RateLimit-Remaining</code> - requests left<br>
+              • <code>X-RateLimit-Reset</code> - when the window resets
+            </div>
+            <p>When you exceed the limit:</p>
+            <ul>
+              <li>Status code: <code>429 Too Many Requests</code></li>
+              <li><code>Retry-After</code> header tells you when to try again</li>
+              <li>Your requests are blocked until the window resets</li>
+            </ul>
+            <div class="try-it-tip">Click "Send Request" 6+ times quickly to trigger the rate limit!</div>
+          `,
+        },
+        rateLimitNewUser: {
+          icon: "👤",
+          title: "Rate Limits Per User",
+          content: `
+            <p>Rate limits are typically tracked <strong>per user or API key</strong>, not globally.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Per-User Rate Limiting</strong>
+              Different users have independent rate limit counters. Adding <code>?userId=user-123</code> simulates a different user with their own fresh limit.
+            </div>
+            <p>Real-world rate limiting uses:</p>
+            <ul>
+              <li><strong>API Key</strong> - identifies your application</li>
+              <li><strong>User Token</strong> - identifies the logged-in user</li>
+              <li><strong>IP Address</strong> - fallback for unauthenticated requests</li>
+            </ul>
+            <div class="try-it-tip">Use different userId values to see each gets their own rate limit!</div>
+          `,
+        },
+
+        // --- Bulk Operations Explanations ---
+        bulkCreate: {
+          icon: "📦",
+          title: "Bulk Create",
+          content: `
+            <p><strong>Bulk operations</strong> let you create, update, or delete multiple items in a single request - much more efficient than individual calls!</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Batch Processing</strong>
+              Instead of 3 separate POST requests, send one request with an array of items. Benefits:<br>
+              • Fewer HTTP round-trips<br>
+              • Atomic operations (all-or-nothing option)<br>
+              • Better performance at scale
+            </div>
+            <p>The response shows results for each item:</p>
+            <ul>
+              <li><strong>summary</strong> - total, successful, failed counts</li>
+              <li><strong>results</strong> - individual status for each item</li>
+              <li>Some items may succeed while others fail</li>
+            </ul>
+            <div class="try-it-tip">Try adding an item without a name to see partial success handling!</div>
+          `,
+        },
+        bulkUpdate: {
+          icon: "📝",
+          title: "Bulk Update",
+          content: `
+            <p>Update multiple resources in one request by providing an array of updates.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Partial Bulk Updates</strong>
+              Each update identifies a resource (by SKU here) and specifies the fields to change. Not all updates need to succeed - the response shows which worked.
+            </div>
+            <p>This pattern is common for:</p>
+            <ul>
+              <li>Inventory quantity updates</li>
+              <li>Batch status changes</li>
+              <li>Mass price adjustments</li>
+              <li>Syncing data between systems</li>
+            </ul>
+            <div class="try-it-tip">View /api/inventory first, then update with real SKUs!</div>
+          `,
+        },
+        viewInventory: {
+          icon: "📋",
+          title: "View Inventory",
+          content: `
+            <p>This helper endpoint lets you see all inventory items, including ones you created with bulk operations.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Resource Collections</strong>
+              A simple GET endpoint returning all items in a collection. Useful for verifying bulk operations worked and seeing the current state.
+            </div>
+            <p>Use this to:</p>
+            <ul>
+              <li>See the initial inventory items (SKU001, SKU002, SKU003)</li>
+              <li>Verify your bulk creates added new items</li>
+              <li>Confirm bulk updates changed quantities</li>
+            </ul>
+            <div class="try-it-tip">Check this before and after bulk operations to see the changes!</div>
+          `,
+        },
+
+        // --- Nested Resources Explanations ---
+        getReviews: {
+          icon: "🔗",
+          title: "Nested Resources (Reviews)",
+          content: `
+            <p><strong>Nested resources</strong> represent relationships: a book HAS MANY reviews. The URL structure shows this hierarchy.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Nested Resource URLs</strong>
+              <code>/api/books/1/reviews</code> means "reviews belonging to book 1".<br><br>
+              This URL pattern clearly shows:<br>
+              • Parent resource: <code>/books/1</code><br>
+              • Child collection: <code>/reviews</code>
+            </div>
+            <p>The response includes context about the parent:</p>
+            <ul>
+              <li>Book info (id, title) for reference</li>
+              <li>Review count and average rating</li>
+              <li>The reviews themselves</li>
+            </ul>
+            <div class="try-it-tip">Try /api/books/2/reviews to see reviews for a different book!</div>
+          `,
+        },
+        addReview: {
+          icon: "⭐",
+          title: "Add a Review",
+          content: `
+            <p>POST to a nested resource creates a child that automatically belongs to the parent.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Creating Nested Resources</strong>
+              POST to <code>/api/books/1/reviews</code> creates a review for book 1. The bookId is determined by the URL, not the request body. This prevents mismatched relationships.
+            </div>
+            <p>The review data includes:</p>
+            <ul>
+              <li><strong>rating</strong> (1-5) - required validation</li>
+              <li><strong>comment</strong> - optional text</li>
+              <li><strong>author</strong> - defaults to "Anonymous"</li>
+            </ul>
+            <div class="try-it-tip">Add reviews to different books, then GET their reviews to see them!</div>
+          `,
+        },
+
+        // --- Field Selection Explanations ---
+        fieldSelectBasic: {
+          icon: "🎛️",
+          title: "Field Selection",
+          content: `
+            <p><strong>Field selection</strong> lets clients request only the fields they need, reducing payload size.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Sparse Fieldsets</strong>
+              With <code>?fields=id,title,author</code>, the server returns only those three fields. This is similar to GraphQL's field selection but in REST style.
+            </div>
+            <p>Benefits of field selection:</p>
+            <ul>
+              <li><strong>Smaller responses</strong> - less data over the network</li>
+              <li><strong>Faster parsing</strong> - client processes less data</li>
+              <li><strong>Privacy</strong> - don't expose unnecessary fields</li>
+            </ul>
+            <div class="try-it-tip">Try ?fields=title to get just titles, or add invalid fields to see error handling!</div>
+          `,
+        },
+        fieldSelectMinimal: {
+          icon: "✂️",
+          title: "Minimal Fields",
+          content: `
+            <p>Request the absolute minimum data needed for your use case.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Optimizing Payload Size</strong>
+              For a dropdown list, you might only need <code>id</code> and <code>title</code>. Why transfer author, year, and genre if you won't use them?
+            </div>
+            <p>Common use cases:</p>
+            <ul>
+              <li>Autocomplete - just id and name</li>
+              <li>List views - subset of fields</li>
+              <li>Mobile apps - bandwidth matters</li>
+              <li>Embedded ids - just id field</li>
+            </ul>
+            <div class="try-it-tip">Compare the response size between all fields and minimal fields!</div>
+          `,
+        },
+
+        // --- Content Negotiation Explanations ---
+        contentJson: {
+          icon: "📋",
+          title: "Content as JSON",
+          content: `
+            <p><strong>Content negotiation</strong> lets clients request data in their preferred format using the <code>Accept</code> header.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Accept Header</strong>
+              The client sends <code>Accept: application/json</code> to request JSON format. The server responds with the data formatted accordingly and sets <code>Content-Type</code> in the response.
+            </div>
+            <p>JSON is typically the default because:</p>
+            <ul>
+              <li>Native to JavaScript</li>
+              <li>Widely supported</li>
+              <li>Human-readable</li>
+              <li>Smaller than XML</li>
+            </ul>
+            <div class="try-it-tip">Compare the same data in JSON vs XML vs CSV formats!</div>
+          `,
+        },
+        contentXml: {
+          icon: "📰",
+          title: "Content as XML",
+          content: `
+            <p>Request the same data as <strong>XML</strong> for systems that prefer it.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Multiple Representations</strong>
+              Same data, different format. XML is still used in enterprise systems, SOAP services, and some legacy applications. The API serves both without separate endpoints.
+            </div>
+            <p>When XML is preferred:</p>
+            <ul>
+              <li>Integration with legacy systems</li>
+              <li>SOAP web services</li>
+              <li>XML-based tools and workflows</li>
+              <li>Document-oriented data</li>
+            </ul>
+            <div class="try-it-tip">Notice how the same data structure is represented with XML tags!</div>
+          `,
+        },
+        contentCsv: {
+          icon: "📊",
+          title: "Content as CSV",
+          content: `
+            <p>Get data as <strong>CSV</strong> (Comma-Separated Values) for spreadsheet applications.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Format for Data Analysis</strong>
+              CSV is perfect for exporting to Excel, Google Sheets, or data analysis tools. The <code>Accept: text/csv</code> header tells the server to return tabular data.
+            </div>
+            <p>CSV is ideal for:</p>
+            <ul>
+              <li>Excel/spreadsheet import</li>
+              <li>Data exports for analysis</li>
+              <li>Simple flat data structures</li>
+              <li>Bulk data downloads</li>
+            </ul>
+            <div class="try-it-tip">Copy the CSV response and paste into Excel or Google Sheets!</div>
+          `,
+        },
+
+        // --- Idempotency Explanations ---
+        paymentNew: {
+          icon: "💳",
+          title: "Payment with Idempotency Key",
+          content: `
+            <p><strong>Idempotency keys</strong> prevent duplicate operations - crucial for payments and financial transactions!</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Idempotency</strong>
+              The <code>X-Idempotency-Key</code> header uniquely identifies this payment attempt. If the same key is sent again, the server returns the original response instead of processing a duplicate payment.
+            </div>
+            <p>Why this matters:</p>
+            <ul>
+              <li>Network errors might make you unsure if payment succeeded</li>
+              <li>Safely retry without double-charging</li>
+              <li>Same key = same result (idempotent)</li>
+            </ul>
+            <div class="try-it-tip">Send this request, then try "Retry (Same Key)" to see the cached response!</div>
+          `,
+        },
+        paymentRetry: {
+          icon: "🔁",
+          title: "Payment Retry (Same Key)",
+          content: `
+            <p>This sends the <strong>exact same idempotency key</strong> as the previous payment.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Safe Retries</strong>
+              Because we're using the same <code>X-Idempotency-Key: order-12345-v1</code>, the server recognizes this as a retry and returns the original response. No duplicate payment is processed!
+            </div>
+            <p>The response includes:</p>
+            <ul>
+              <li><code>idempotencyKeyReused: true</code> - indicates this is cached</li>
+              <li>A note explaining it's the original response</li>
+              <li>Same payment ID as the first request</li>
+            </ul>
+            <div class="try-it-tip">Change the key slightly (v2) to process a new payment!</div>
+          `,
+        },
+
+        // --- API Versioning Explanations ---
+        versionV1: {
+          icon: "1️⃣",
+          title: "API Version 1",
+          content: `
+            <p><strong>API versioning</strong> allows you to evolve your API while maintaining backward compatibility.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: URL Path Versioning</strong>
+              <code>/api/v1/greeting</code> is version 1 of the greeting API. Old clients can keep using v1 while new features are added to v2. Common patterns:<br>
+              • Path: <code>/api/v1/</code> (this example)<br>
+              • Header: <code>Accept-Version: 1.0</code><br>
+              • Query: <code>?version=1</code>
+            </div>
+            <p>V1 is simple - just returns a greeting with the name.</p>
+            <div class="try-it-tip">Compare this response with v2 to see the evolution!</div>
+          `,
+        },
+        versionV2: {
+          icon: "2️⃣",
+          title: "API Version 2",
+          content: `
+            <p>Version 2 adds <strong>new features</strong> while v1 continues to work unchanged.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Non-Breaking Changes</strong>
+              V2 adds multi-language support without breaking v1 clients. New features are opt-in. The response documents what's new in v2.
+            </div>
+            <p>V2 improvements:</p>
+            <ul>
+              <li>New <code>lang</code> parameter for language selection</li>
+              <li>6 supported languages</li>
+              <li><code>newInV2</code> field documents additions</li>
+              <li>V1 behavior still works (defaults to English)</li>
+            </ul>
+            <div class="try-it-tip">Try the Spanish version next to see multi-language in action!</div>
+          `,
+        },
+        versionV2Spanish: {
+          icon: "🌍",
+          title: "V2 with Spanish",
+          content: `
+            <p>Demonstrate v2's new language feature by requesting a Spanish greeting.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Feature Evolution</strong>
+              With <code>?lang=es</code>, v2 returns "Hola, Amigo!" instead of "Hello, Amigo!". This feature doesn't exist in v1 - that's why we have versions!
+            </div>
+            <p>Supported languages in v2:</p>
+            <ul>
+              <li>en - English (Hello)</li>
+              <li>es - Spanish (Hola)</li>
+              <li>fr - French (Bonjour)</li>
+              <li>de - German (Hallo)</li>
+              <li>ja - Japanese (こんにちは)</li>
+              <li>hi - Hindi (नमस्ते)</li>
+            </ul>
+            <div class="try-it-tip">Try other language codes: ja, fr, de, hi!</div>
+          `,
+        },
+
+        // --- ETag/Caching Explanations ---
+        etagGet: {
+          icon: "📰",
+          title: "Get Article (with ETag)",
+          content: `
+            <p><strong>ETags</strong> (Entity Tags) enable efficient caching by identifying specific versions of a resource.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: ETags for Caching</strong>
+              The response includes an <code>ETag</code> header (like "v1") that identifies this version. Save it! On future requests, send it back to check if content changed.
+            </div>
+            <p>How ETags work:</p>
+            <ul>
+              <li>GET returns data + ETag header</li>
+              <li>Client stores ETag with cached data</li>
+              <li>Next request includes <code>If-None-Match: "etag"</code></li>
+              <li>Server returns 304 if unchanged (use cache)</li>
+            </ul>
+            <div class="try-it-tip">Note the ETag value, then try "Conditional Request"!</div>
+          `,
+        },
+        etagConditional: {
+          icon: "⚡",
+          title: "Conditional Request",
+          content: `
+            <p>Send a <strong>conditional request</strong> with <code>If-None-Match</code> to check if your cached version is still valid.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: 304 Not Modified</strong>
+              When you send <code>If-None-Match: "v1"</code> and the server's ETag is still "v1", it returns <code>304 Not Modified</code> with NO BODY. This saves bandwidth - use your cached copy!
+            </div>
+            <p>Benefits:</p>
+            <ul>
+              <li>Saves bandwidth (no body transferred)</li>
+              <li>Faster responses (less data)</li>
+              <li>Confirms cache is valid</li>
+              <li>Standard HTTP caching mechanism</li>
+            </ul>
+            <div class="try-it-tip">Update the article first, then this request will return full content (new ETag)!</div>
+          `,
+        },
+        etagUpdate: {
+          icon: "✏️",
+          title: "Update Article",
+          content: `
+            <p>Update the article content, which <strong>changes the ETag</strong>.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: ETag Changes on Modification</strong>
+              When content changes, the server generates a new ETag. This invalidates cached copies - clients with old ETags will get the new content on their next request.
+            </div>
+            <p>After updating:</p>
+            <ul>
+              <li>The response shows the new ETag</li>
+              <li>Conditional requests with old ETag get 200 (new content)</li>
+              <li>Conditional requests with new ETag get 304 (use cache)</li>
+            </ul>
+            <div class="try-it-tip">Update, note the new ETag, then try conditional requests with old vs new ETags!</div>
+          `,
+        },
+
+        // --- Webhook Explanations ---
+        webhookSimulate: {
+          icon: "🔔",
+          title: "Simulate Webhook Event",
+          content: `
+            <p><strong>Webhooks</strong> are "reverse APIs" - instead of you calling the server, the server calls YOUR URL when events happen.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Webhooks / Event-Driven Architecture</strong>
+              In a real system, you'd register a callback URL. When events occur (order created, payment completed), the server POSTs a payload to YOUR server. This simulation shows what that payload looks like.
+            </div>
+            <p>Common webhook events:</p>
+            <ul>
+              <li><code>order.created</code> - new order placed</li>
+              <li><code>order.shipped</code> - order dispatched</li>
+              <li><code>payment.completed</code> - payment processed</li>
+              <li><code>user.registered</code> - new signup</li>
+            </ul>
+            <div class="try-it-tip">Simulate different events, then view /api/webhooks/events to see the history!</div>
+          `,
+        },
+        webhookEvents: {
+          icon: "📜",
+          title: "View Webhook Events",
+          content: `
+            <p>See all the webhook events that have been simulated.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Event Log / Audit Trail</strong>
+              Real webhook systems keep logs of all events sent. This endpoint shows the last 10 simulated events with their payloads, timestamps, and event types.
+            </div>
+            <p>Each event includes:</p>
+            <ul>
+              <li><code>id</code> - unique event identifier</li>
+              <li><code>type</code> - the event name</li>
+              <li><code>timestamp</code> - when it occurred</li>
+              <li><code>data</code> - the event payload</li>
+            </ul>
+            <div class="try-it-tip">Simulate several events, then refresh this to see the growing list!</div>
+          `,
+        },
+
+        // --- Health & Info Explanations ---
+        healthCheck: {
+          icon: "💚",
+          title: "Health Check",
+          content: `
+            <p><strong>Health check endpoints</strong> let monitoring tools verify your API is running and responsive.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: Health Endpoints</strong>
+              Load balancers and monitoring tools regularly ping <code>/health</code> or <code>/api/health</code>. If it returns 200, the service is healthy. If it fails or times out, alerts are triggered.
+            </div>
+            <p>Typical health response includes:</p>
+            <ul>
+              <li><code>status</code> - "healthy", "degraded", "unhealthy"</li>
+              <li><code>uptime</code> - how long the server has been running</li>
+              <li><code>timestamp</code> - current server time</li>
+              <li><code>version</code> - API version for debugging</li>
+            </ul>
+            <div class="try-it-tip">This is what Kubernetes, AWS ELB, and monitoring tools check constantly!</div>
+          `,
+        },
+        apiInfo: {
+          icon: "ℹ️",
+          title: "API Information",
+          content: `
+            <p>A <strong>metadata endpoint</strong> that describes the API and its available endpoints.</p>
+            <div class="concept-highlight">
+              <strong>🎯 Key Concept: API Discovery</strong>
+              Info endpoints help developers discover what's available. This is a lightweight alternative to full API documentation, useful for quick reference and tooling.
+            </div>
+            <p>The response provides:</p>
+            <ul>
+              <li>API name and description</li>
+              <li>Current version</li>
+              <li>Categorized list of endpoints</li>
+              <li>Documentation links</li>
+            </ul>
+            <div class="try-it-tip">Bookmark this endpoint as a quick reference while exploring the API!</div>
+          `,
+        },
       };
 
       function loadExample(name) {
@@ -1276,12 +2385,28 @@ Click "Send Request" or try one of the examples on the left to see the response 
         if (explanation) {
           const panel = document.getElementById("explanation-panel");
           panel.classList.remove("hidden");
+          panel.classList.remove("expanded"); // Reset to compact view
           document.getElementById("explanation-icon").textContent =
             explanation.icon;
           document.getElementById("explanation-title").textContent =
             explanation.title;
           document.getElementById("explanation-content").innerHTML =
             explanation.content;
+
+          // Extract first sentence/paragraph for preview
+          const tempDiv = document.createElement("div");
+          tempDiv.innerHTML = explanation.content;
+          const firstP = tempDiv.querySelector("p");
+          let previewText = firstP ? firstP.textContent : "";
+          // Truncate to first sentence or 100 chars
+          if (previewText.length > 100) {
+            const firstSentence = previewText.match(/^[^.!?]+[.!?]/);
+            previewText = firstSentence
+              ? firstSentence[0]
+              : previewText.substring(0, 100) + "...";
+          }
+          document.getElementById("explanation-preview").textContent =
+            previewText;
 
           // Update method badge
           const badge = document.getElementById("explanation-method-badge");
@@ -1296,6 +2421,11 @@ Click "Send Request" or try one of the examples on the left to see the response 
         } else {
           switchTab("headers");
         }
+      }
+
+      function toggleExplanation() {
+        const panel = document.getElementById("explanation-panel");
+        panel.classList.toggle("expanded");
       }
 
       function switchTab(tabName) {
@@ -1321,6 +2451,7 @@ Click "Send Request" or try one of the examples on the left to see the response 
             PUT: "#fd7e14",
             PATCH: "#6f42c1",
             DELETE: "#dc3545",
+            HEAD: "#6c757d",
           }[method] || "#00d2ff";
       }
 

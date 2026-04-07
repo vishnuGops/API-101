@@ -94,20 +94,43 @@ app.get("/", (req, res) => {
     message: "🎉 Welcome to API 101 Learning Playground!",
     version: "1.0.0",
     tip: "Try visiting /api/books to see a list of books",
-    availableEndpoints: [
-      "GET    /api/books          - Get all books",
-      "GET    /api/books/:id      - Get a specific book",
-      "POST   /api/books          - Create a new book",
-      "PUT    /api/books/:id      - Replace a book completely",
-      "PATCH  /api/books/:id      - Update specific book fields",
-      "DELETE /api/books/:id      - Delete a book",
-      "GET    /api/search         - Search with query parameters",
-      "GET    /api/users          - Get users (requires auth header)",
-      "POST   /api/echo           - Echo back your request",
-      "GET    /api/status/:code   - Get different status codes",
-      "GET    /api/slow           - Simulates a slow API response",
-      "GET    /api/random         - Get random data",
-    ],
+    availableEndpoints: {
+      basics: [
+        "GET    /api/books          - Get all books",
+        "GET    /api/books/:id      - Get a specific book",
+        "POST   /api/books          - Create a new book",
+        "PUT    /api/books/:id      - Replace a book completely",
+        "PATCH  /api/books/:id      - Update specific book fields",
+        "DELETE /api/books/:id      - Delete a book",
+        "GET    /api/search         - Search with query parameters",
+        "GET    /api/users          - Get users (requires auth header)",
+        "POST   /api/echo           - Echo back your request",
+        "GET    /api/status/:code   - Get different status codes",
+        "GET    /api/slow           - Simulates a slow API response",
+        "GET    /api/random         - Get random data",
+      ],
+      advanced: [
+        "GET    /api/products       - Paginated products list",
+        "GET    /api/limited        - Rate limiting demo (5 req/min)",
+        "POST   /api/bulk/create    - Bulk create items",
+        "PATCH  /api/bulk/update    - Bulk update items",
+        "GET    /api/inventory      - View inventory",
+        "GET    /api/books/:id/reviews - Nested resource (reviews)",
+        "POST   /api/books/:id/reviews - Add a review",
+        "GET    /api/books-select   - Field selection (?fields=id,title)",
+        "HEAD   /api/books          - Get metadata only",
+        "GET    /api/data           - Content negotiation (Accept header)",
+        "POST   /api/payment        - Idempotency key demo",
+        "GET    /api/v1/greeting    - API versioning (v1)",
+        "GET    /api/v2/greeting    - API versioning (v2 with languages)",
+        "GET    /api/article        - ETag caching demo",
+        "PUT    /api/article        - Update article (changes ETag)",
+        "POST   /api/webhooks/simulate - Webhook simulation",
+        "GET    /api/webhooks/events   - View webhook events",
+        "GET    /api/health         - Health check endpoint",
+        "GET    /api/info           - API metadata",
+      ],
+    },
   });
 });
 
@@ -705,6 +728,750 @@ app.post("/api/form", (req, res) => {
     message: "Form data received!",
     contentType: req.headers["content-type"],
     formData: req.body,
+  });
+});
+
+// ============================================================================
+// 📄 PAGINATION API - Understanding paginated responses
+// ============================================================================
+
+// Generate a larger dataset for pagination demos
+const allProducts = Array.from({ length: 100 }, (_, i) => ({
+  id: i + 1,
+  name: `Product ${i + 1}`,
+  price: Math.floor(Math.random() * 1000) + 10,
+  category: ["Electronics", "Books", "Clothing", "Food", "Toys"][i % 5],
+  inStock: Math.random() > 0.3,
+}));
+
+/**
+ * GET /api/products - Paginated product list
+ *
+ * 🎯 CONCEPT: Pagination prevents overwhelming responses with too much data
+ *
+ * Query Parameters:
+ * - page: Page number (default: 1)
+ * - limit: Items per page (default: 10, max: 50)
+ * - category: Filter by category
+ *
+ * Example: /api/products?page=2&limit=5
+ */
+app.get("/api/products", (req, res) => {
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
+  const category = req.query.category;
+
+  let filtered = [...allProducts];
+
+  if (category) {
+    filtered = filtered.filter(
+      (p) => p.category.toLowerCase() === category.toLowerCase(),
+    );
+  }
+
+  const totalItems = filtered.length;
+  const totalPages = Math.ceil(totalItems / limit);
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+  const items = filtered.slice(startIndex, endIndex);
+
+  res.json({
+    success: true,
+    pagination: {
+      currentPage: page,
+      itemsPerPage: limit,
+      totalItems,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
+      nextPage: page < totalPages ? page + 1 : null,
+      prevPage: page > 1 ? page - 1 : null,
+    },
+    links: {
+      self: `/api/products?page=${page}&limit=${limit}`,
+      first: `/api/products?page=1&limit=${limit}`,
+      last: `/api/products?page=${totalPages}&limit=${limit}`,
+      next:
+        page < totalPages
+          ? `/api/products?page=${page + 1}&limit=${limit}`
+          : null,
+      prev: page > 1 ? `/api/products?page=${page - 1}&limit=${limit}` : null,
+    },
+    data: items,
+  });
+});
+
+// ============================================================================
+// 🚦 RATE LIMITING DEMO
+// ============================================================================
+
+const rateLimitStore = new Map();
+
+/**
+ * GET /api/limited - Experience rate limiting
+ *
+ * 🎯 CONCEPT: APIs limit requests to prevent abuse and ensure fair usage
+ *
+ * This endpoint allows only 5 requests per minute per "user"
+ * Use ?userId=xxx to simulate different users
+ */
+app.get("/api/limited", (req, res) => {
+  const userId = req.query.userId || req.ip || "anonymous";
+  const now = Date.now();
+  const windowMs = 60000; // 1 minute
+  const maxRequests = 5;
+
+  // Get or create rate limit record
+  let record = rateLimitStore.get(userId);
+  if (!record || now - record.windowStart > windowMs) {
+    record = { windowStart: now, count: 0 };
+  }
+
+  record.count++;
+  rateLimitStore.set(userId, record);
+
+  const remaining = Math.max(0, maxRequests - record.count);
+  const resetTime = new Date(record.windowStart + windowMs);
+
+  // Set rate limit headers (standard practice)
+  res.set({
+    "X-RateLimit-Limit": maxRequests,
+    "X-RateLimit-Remaining": remaining,
+    "X-RateLimit-Reset": Math.ceil(resetTime.getTime() / 1000),
+  });
+
+  if (record.count > maxRequests) {
+    const retryAfter = Math.ceil((record.windowStart + windowMs - now) / 1000);
+    res.set("Retry-After", retryAfter);
+
+    return res.status(429).json({
+      success: false,
+      error: "Too Many Requests",
+      message: `Rate limit exceeded. You made ${record.count} requests.`,
+      limit: maxRequests,
+      windowSeconds: windowMs / 1000,
+      retryAfterSeconds: retryAfter,
+      tip: "Wait for the window to reset, or use a different userId parameter",
+    });
+  }
+
+  res.json({
+    success: true,
+    message: `Request ${record.count} of ${maxRequests} allowed`,
+    rateLimit: {
+      limit: maxRequests,
+      remaining,
+      resetAt: resetTime.toISOString(),
+      userId,
+    },
+    tip: "Keep refreshing to see rate limiting in action!",
+  });
+});
+
+// ============================================================================
+// 📦 BULK OPERATIONS API
+// ============================================================================
+
+let inventory = [
+  { sku: "SKU001", name: "Widget A", quantity: 100 },
+  { sku: "SKU002", name: "Widget B", quantity: 50 },
+  { sku: "SKU003", name: "Gadget X", quantity: 75 },
+];
+
+/**
+ * POST /api/bulk/create - Create multiple items at once
+ *
+ * 🎯 CONCEPT: Bulk operations are efficient for batch processing
+ *
+ * Body: { items: [{ name, quantity }, ...] }
+ */
+app.post("/api/bulk/create", (req, res) => {
+  const { items } = req.body;
+
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({
+      success: false,
+      error: "Body must contain 'items' array with at least one item",
+      example: { items: [{ name: "Item 1", quantity: 10 }] },
+    });
+  }
+
+  if (items.length > 100) {
+    return res.status(400).json({
+      success: false,
+      error: "Maximum 100 items per bulk operation",
+    });
+  }
+
+  const results = items.map((item, index) => {
+    if (!item.name) {
+      return { index, success: false, error: "Missing 'name' field" };
+    }
+    const newItem = {
+      sku: `SKU${String(Date.now() + index).slice(-6)}`,
+      name: item.name,
+      quantity: item.quantity || 0,
+    };
+    inventory.push(newItem);
+    return { index, success: true, created: newItem };
+  });
+
+  const successful = results.filter((r) => r.success).length;
+  const failed = results.filter((r) => !r.success).length;
+
+  res.status(successful > 0 ? 201 : 400).json({
+    success: failed === 0,
+    summary: {
+      total: items.length,
+      successful,
+      failed,
+    },
+    results,
+  });
+});
+
+/**
+ * PATCH /api/bulk/update - Update multiple items at once
+ *
+ * Body: { updates: [{ sku, quantity }, ...] }
+ */
+app.patch("/api/bulk/update", (req, res) => {
+  const { updates } = req.body;
+
+  if (!Array.isArray(updates) || updates.length === 0) {
+    return res.status(400).json({
+      success: false,
+      error: "Body must contain 'updates' array",
+    });
+  }
+
+  const results = updates.map((update) => {
+    const item = inventory.find((i) => i.sku === update.sku);
+    if (!item) {
+      return { sku: update.sku, success: false, error: "SKU not found" };
+    }
+    if (update.quantity !== undefined) item.quantity = update.quantity;
+    if (update.name !== undefined) item.name = update.name;
+    return { sku: update.sku, success: true, updated: item };
+  });
+
+  res.json({
+    success: true,
+    summary: {
+      total: updates.length,
+      successful: results.filter((r) => r.success).length,
+      failed: results.filter((r) => !r.success).length,
+    },
+    results,
+  });
+});
+
+/**
+ * GET /api/inventory - View current inventory
+ */
+app.get("/api/inventory", (req, res) => {
+  res.json({
+    success: true,
+    count: inventory.length,
+    data: inventory,
+  });
+});
+
+// ============================================================================
+// 🔗 NESTED RESOURCES API - Books with Reviews
+// ============================================================================
+
+let reviews = [
+  {
+    id: 1,
+    bookId: 1,
+    rating: 5,
+    comment: "Excellent book on API design!",
+    author: "Reader1",
+  },
+  {
+    id: 2,
+    bookId: 1,
+    rating: 4,
+    comment: "Very informative",
+    author: "Reader2",
+  },
+  {
+    id: 3,
+    bookId: 2,
+    rating: 5,
+    comment: "A must-read for web developers",
+    author: "DevFan",
+  },
+];
+let nextReviewId = 4;
+
+/**
+ * GET /api/books/:bookId/reviews - Get reviews for a specific book
+ *
+ * 🎯 CONCEPT: Nested resources show relationships (a book HAS MANY reviews)
+ */
+app.get("/api/books/:bookId/reviews", (req, res) => {
+  const bookId = parseInt(req.params.bookId);
+  const book = books.find((b) => b.id === bookId);
+
+  if (!book) {
+    return res.status(404).json({
+      success: false,
+      error: "Book not found",
+    });
+  }
+
+  const bookReviews = reviews.filter((r) => r.bookId === bookId);
+  const avgRating =
+    bookReviews.length > 0
+      ? (
+          bookReviews.reduce((sum, r) => sum + r.rating, 0) / bookReviews.length
+        ).toFixed(1)
+      : null;
+
+  res.json({
+    success: true,
+    book: { id: book.id, title: book.title },
+    reviewCount: bookReviews.length,
+    averageRating: avgRating,
+    data: bookReviews,
+  });
+});
+
+/**
+ * POST /api/books/:bookId/reviews - Add a review to a book
+ *
+ * Body: { rating: 1-5, comment, author }
+ */
+app.post("/api/books/:bookId/reviews", (req, res) => {
+  const bookId = parseInt(req.params.bookId);
+  const book = books.find((b) => b.id === bookId);
+
+  if (!book) {
+    return res.status(404).json({ success: false, error: "Book not found" });
+  }
+
+  const { rating, comment, author } = req.body;
+
+  if (!rating || rating < 1 || rating > 5) {
+    return res.status(400).json({
+      success: false,
+      error: "Rating must be between 1 and 5",
+    });
+  }
+
+  const newReview = {
+    id: nextReviewId++,
+    bookId,
+    rating,
+    comment: comment || "",
+    author: author || "Anonymous",
+  };
+
+  reviews.push(newReview);
+
+  res.status(201).json({
+    success: true,
+    message: "Review added!",
+    data: newReview,
+  });
+});
+
+// ============================================================================
+// 🎛️ FIELD SELECTION API - Choose which fields to return
+// ============================================================================
+
+/**
+ * GET /api/books-select - Get books with specific fields only
+ *
+ * 🎯 CONCEPT: Field selection reduces payload size (like GraphQL's field selection)
+ *
+ * Query param: fields (comma-separated list)
+ * Example: /api/books-select?fields=id,title,year
+ */
+app.get("/api/books-select", (req, res) => {
+  const fieldsParam = req.query.fields;
+  const availableFields = ["id", "title", "author", "year", "genre"];
+
+  if (!fieldsParam) {
+    return res.json({
+      success: true,
+      tip: "Add ?fields=id,title to select specific fields",
+      availableFields,
+      data: books,
+    });
+  }
+
+  const requestedFields = fieldsParam
+    .split(",")
+    .map((f) => f.trim().toLowerCase());
+  const validFields = requestedFields.filter((f) =>
+    availableFields.includes(f),
+  );
+  const invalidFields = requestedFields.filter(
+    (f) => !availableFields.includes(f),
+  );
+
+  const selectedData = books.map((book) => {
+    const selected = {};
+    validFields.forEach((field) => {
+      selected[field] = book[field];
+    });
+    return selected;
+  });
+
+  res.json({
+    success: true,
+    selectedFields: validFields,
+    invalidFields: invalidFields.length > 0 ? invalidFields : undefined,
+    availableFields,
+    data: selectedData,
+  });
+});
+
+// ============================================================================
+// 📋 HEAD REQUEST DEMO
+// ============================================================================
+
+/**
+ * HEAD /api/books - Get metadata without the response body
+ *
+ * 🎯 CONCEPT: HEAD is like GET but returns only headers, no body
+ *
+ * Useful for: checking if resource exists, getting content length, caching
+ */
+app.head("/api/books", (req, res) => {
+  res.set({
+    "X-Total-Count": books.length,
+    "X-Last-Modified": new Date().toISOString(),
+    "Content-Type": "application/json",
+  });
+  res.status(200).end();
+});
+
+// ============================================================================
+// 🔀 CONTENT NEGOTIATION API
+// ============================================================================
+
+/**
+ * GET /api/data - Returns data in different formats based on Accept header
+ *
+ * 🎯 CONCEPT: Content negotiation lets clients request their preferred format
+ *
+ * Headers:
+ * - Accept: application/json (default)
+ * - Accept: application/xml
+ * - Accept: text/csv
+ * - Accept: text/plain
+ */
+app.get("/api/data", (req, res) => {
+  const sampleData = [
+    { id: 1, name: "Alice", email: "alice@example.com" },
+    { id: 2, name: "Bob", email: "bob@example.com" },
+    { id: 3, name: "Charlie", email: "charlie@example.com" },
+  ];
+
+  const acceptHeader = req.headers.accept || "application/json";
+
+  if (acceptHeader.includes("text/csv")) {
+    res.set("Content-Type", "text/csv");
+    const csv =
+      "id,name,email\n" +
+      sampleData.map((d) => `${d.id},${d.name},${d.email}`).join("\n");
+    return res.send(csv);
+  }
+
+  if (acceptHeader.includes("application/xml")) {
+    res.set("Content-Type", "application/xml");
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<users>
+${sampleData.map((d) => `  <user><id>${d.id}</id><name>${d.name}</name><email>${d.email}</email></user>`).join("\n")}
+</users>`;
+    return res.send(xml);
+  }
+
+  if (acceptHeader.includes("text/plain")) {
+    res.set("Content-Type", "text/plain");
+    const text = sampleData
+      .map((d) => `ID: ${d.id}, Name: ${d.name}, Email: ${d.email}`)
+      .join("\n");
+    return res.send(text);
+  }
+
+  // Default: JSON
+  res.json({
+    success: true,
+    message: "Content negotiation demo",
+    tip: "Try different Accept headers: application/json, application/xml, text/csv, text/plain",
+    acceptedFormat: "application/json",
+    data: sampleData,
+  });
+});
+
+// ============================================================================
+// 🔑 IDEMPOTENCY KEY DEMO
+// ============================================================================
+
+const processedIdempotencyKeys = new Map();
+
+/**
+ * POST /api/payment - Simulates a payment with idempotency key
+ *
+ * 🎯 CONCEPT: Idempotency keys prevent duplicate operations (crucial for payments!)
+ *
+ * Header: X-Idempotency-Key: unique-key-here
+ */
+app.post("/api/payment", (req, res) => {
+  const idempotencyKey = req.headers["x-idempotency-key"];
+  const { amount, currency, description } = req.body;
+
+  if (!idempotencyKey) {
+    return res.status(400).json({
+      success: false,
+      error: "Missing X-Idempotency-Key header",
+      tip: "Include a unique key to prevent duplicate payments",
+      example: "X-Idempotency-Key: order-12345-attempt-1",
+    });
+  }
+
+  if (!amount || typeof amount !== "number") {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid amount",
+    });
+  }
+
+  // Check if we've seen this idempotency key before
+  if (processedIdempotencyKeys.has(idempotencyKey)) {
+    const cachedResponse = processedIdempotencyKeys.get(idempotencyKey);
+    return res.status(200).json({
+      ...cachedResponse,
+      note: "⚠️ This is a cached response - the original request was already processed",
+      idempotencyKeyReused: true,
+    });
+  }
+
+  // Process the "payment"
+  const payment = {
+    id: `PAY-${Date.now()}`,
+    amount,
+    currency: currency || "USD",
+    description: description || "No description",
+    status: "completed",
+    processedAt: new Date().toISOString(),
+  };
+
+  // Cache the response
+  const response = {
+    success: true,
+    message: "Payment processed successfully!",
+    idempotencyKey,
+    data: payment,
+  };
+  processedIdempotencyKeys.set(idempotencyKey, response);
+
+  res.status(201).json(response);
+});
+
+// ============================================================================
+// 🏷️ API VERSIONING DEMO
+// ============================================================================
+
+/**
+ * GET /api/v1/greeting - Version 1 of the greeting API
+ * GET /api/v2/greeting - Version 2 with more features
+ *
+ * 🎯 CONCEPT: API versioning allows backward compatibility while adding features
+ */
+app.get("/api/v1/greeting", (req, res) => {
+  const name = req.query.name || "World";
+  res.json({
+    apiVersion: "1.0",
+    message: `Hello, ${name}!`,
+  });
+});
+
+app.get("/api/v2/greeting", (req, res) => {
+  const name = req.query.name || "World";
+  const language = req.query.lang || "en";
+
+  const greetings = {
+    en: "Hello",
+    es: "Hola",
+    fr: "Bonjour",
+    de: "Hallo",
+    ja: "こんにちは",
+    hi: "नमस्ते",
+  };
+
+  const greeting = greetings[language] || greetings.en;
+
+  res.json({
+    apiVersion: "2.0",
+    message: `${greeting}, ${name}!`,
+    language,
+    supportedLanguages: Object.keys(greetings),
+    newInV2: ["Multiple language support", "Language detection"],
+  });
+});
+
+// ============================================================================
+// ⏰ CONDITIONAL REQUESTS - ETag Demo
+// ============================================================================
+
+let articleContent = "This is the original article content.";
+let articleETag = '"v1"'; // ETags are usually quoted strings
+
+/**
+ * GET /api/article - Get article with ETag for caching
+ *
+ * 🎯 CONCEPT: ETags enable efficient caching - only fetch if content changed
+ *
+ * Headers:
+ * - If-None-Match: "etag-value" - Returns 304 if content unchanged
+ */
+app.get("/api/article", (req, res) => {
+  const clientETag = req.headers["if-none-match"];
+
+  if (clientETag === articleETag) {
+    // Content hasn't changed - tell client to use cached version
+    return res.status(304).end();
+  }
+
+  res.set("ETag", articleETag);
+  res.json({
+    success: true,
+    etag: articleETag,
+    content: articleContent,
+    tip: 'Save the ETag and send it as "If-None-Match" header to check for updates',
+  });
+});
+
+/**
+ * PUT /api/article - Update article (changes the ETag)
+ *
+ * Body: { content: "new content" }
+ */
+app.put("/api/article", (req, res) => {
+  const { content } = req.body;
+
+  if (!content) {
+    return res.status(400).json({ success: false, error: "Missing content" });
+  }
+
+  articleContent = content;
+  articleETag = `"v${Date.now()}"`;
+
+  res.set("ETag", articleETag);
+  res.json({
+    success: true,
+    message: "Article updated",
+    newETag: articleETag,
+    content: articleContent,
+  });
+});
+
+// ============================================================================
+// 🔄 WEBHOOK SIMULATION
+// ============================================================================
+
+const webhookEvents = [];
+
+/**
+ * POST /api/webhooks/register - Register a webhook URL
+ *
+ * 🎯 CONCEPT: Webhooks are callback URLs that receive notifications when events occur
+ *
+ * Body: { url, events: ["order.created", "order.updated"] }
+ */
+app.post("/api/webhooks/simulate", (req, res) => {
+  const { event, data } = req.body;
+
+  if (!event) {
+    return res.status(400).json({
+      success: false,
+      error: "Missing 'event' field",
+      availableEvents: [
+        "order.created",
+        "order.shipped",
+        "payment.completed",
+        "user.registered",
+      ],
+    });
+  }
+
+  const webhookPayload = {
+    id: `evt_${Date.now()}`,
+    type: event,
+    timestamp: new Date().toISOString(),
+    data: data || { message: "Sample event data" },
+  };
+
+  webhookEvents.push(webhookPayload);
+
+  res.status(201).json({
+    success: true,
+    message: "Webhook event simulated!",
+    explanation:
+      "In a real system, this payload would be sent to your registered webhook URL",
+    payload: webhookPayload,
+    tip: "GET /api/webhooks/events to see all simulated events",
+  });
+});
+
+app.get("/api/webhooks/events", (req, res) => {
+  res.json({
+    success: true,
+    count: webhookEvents.length,
+    events: webhookEvents.slice(-10), // Last 10 events
+  });
+});
+
+// ============================================================================
+// 🔍 HEALTH CHECK & METADATA API
+// ============================================================================
+
+/**
+ * GET /api/health - Standard health check endpoint
+ *
+ * 🎯 CONCEPT: Health endpoints let monitoring tools check if the API is running
+ */
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    version: "1.0.0",
+  });
+});
+
+/**
+ * GET /api/info - API metadata and documentation hints
+ */
+app.get("/api/info", (req, res) => {
+  res.json({
+    name: "API 101 Learning Playground",
+    version: "1.0.0",
+    description: "An interactive API for learning REST concepts",
+    endpoints: {
+      core: ["/api/books", "/api/users", "/api/search"],
+      learning: ["/api/echo", "/api/status/:code", "/api/slow", "/api/random"],
+      advanced: [
+        "/api/products (pagination)",
+        "/api/limited (rate limiting)",
+        "/api/bulk/* (batch operations)",
+        "/api/books/:id/reviews (nested resources)",
+        "/api/books-select (field selection)",
+        "/api/data (content negotiation)",
+        "/api/payment (idempotency)",
+        "/api/v1/greeting, /api/v2/greeting (versioning)",
+        "/api/article (ETags/caching)",
+        "/api/webhooks/* (webhook simulation)",
+        "/api/health (health check)",
+      ],
+    },
+    documentation: "Visit http://localhost:3000 for the interactive playground",
   });
 });
 
